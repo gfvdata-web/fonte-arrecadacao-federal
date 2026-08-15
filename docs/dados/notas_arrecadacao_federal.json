@@ -1,0 +1,221 @@
+{
+  "meta": {
+    "slug": "arrecadacao_federal",
+    "atualizado_em": "2026-08-15"
+  },
+
+  "leitura": [
+    {
+      "tabela_id": "bruto",
+      "texto": "Uma aba por ano, 38 linhas × 14 colunas em 2025, com JAN…DEZ e um TOTAL calculado pela própria RFB. Duas coisas saltam: o nível hierárquico não é uma coluna — está no recuo do texto da coluna RECEITAS —, e o rótulo sozinho não é chave. O perfil detectou 4 linhas duplicadas: 'ENTIDADES FINANCEIRAS' e 'DEMAIS EMPRESAS' aparecem três vezes cada, uma vez sob cada tributo pai. Sem qualificar pelo pai, um join por rótulo silenciosamente triplica valores. A Etapa 3 já resolve isso, mas o perfil deixa a razão visível."
+    },
+    {
+      "tabela_id": "tidy",
+      "texto": "14.592 linhas = 384 meses × 38 tributos, grade completa e sem lacunas. A completude é ela mesma uma informação: tributo que ainda não existia entra com zero, não some da tabela. Os 47,4% de nulos em `tributo_pai` são exatamente as 6.912 linhas de nível 1 — nulo estrutural, não dado faltante. As duas medidas convivem: `valor` a preços correntes e `valor_constante` deflacionado pelo IPCA a preços de dez/2025."
+    },
+    {
+      "tabela_id": "aux_abas",
+      "texto": "41 abas nos dois arquivos: 32 tratadas (1994-2025) e 9 fora da série (1970-1993, que mistura quatro moedas e traz 1970-1985 em base anual). O único `ano` nulo é a aba de intervalo '1970-1985'."
+    },
+    {
+      "tabela_id": "aux_ipca",
+      "texto": "392 meses de IPCA, de dez/1993 a jul/2026 — sete meses além do fim da série de arrecadação. O deflator está pronto para meses que a RFB ainda não publicou, o que é conveniente e também é o sintoma da defasagem descrita nas armadilhas."
+    },
+    {
+      "tabela_id": "aux_hierarquia",
+      "texto": "38 tributos, cada um presente nos 384 meses — por isso a coluna `meses` é constante. O auto-relacionamento `tributo_pai` → `tributo` fecha com 100% de cobertura e zero órfãos: toda referência a pai aponta para um tributo que existe na tabela. É a validação de que a árvore está íntegra."
+    }
+  ],
+
+  "armadilhas": [
+    {
+      "titulo": "Dupla contagem por `tipo`",
+      "texto": "Somar todas as linhas do tidy infla o total: `agregado` (SUBTOTAL, ADMINISTRADAS PELA RFB, TOTAL GERAL) já contém `componente`, e `detalhe` já está dentro de `componente`. Qualquer soma, participação ou ranking precisa filtrar `tipo = 'componente'` — são as 15 linhas de nível 1 que somam o total geral, e o pipeline confere essa identidade nos 384 meses. Ignorar o filtro aproximadamente triplica o total.",
+      "impacto": "alto"
+    },
+    {
+      "titulo": "A série para em dez/2025 — e isso é a origem, não o pipeline",
+      "texto": "Verificado na página da RFB em 15/08/2026: a série histórica só oferece os arquivos '1970 a 1993' e '1994 a 2025'. Não existe arquivo de 2026. A RFB publica os meses de 2026 apenas nos relatórios mensais de Análise da Arrecadação, em formato separado. Portanto o painel está estruturalmente 8 meses defasado e continuará assim até a RFB consolidar o ano — provavelmente só em 2027. Qualquer texto do painel que diga 'dados atualizados' precisa dizer até quando.",
+      "impacto": "alto"
+    },
+    {
+      "titulo": "Rótulo não é chave no bruto",
+      "texto": "'ENTIDADES FINANCEIRAS' e 'DEMAIS EMPRESAS' aparecem três vezes cada na mesma aba, como abertura de três tributos pais diferentes. Qualquer análise feita direto sobre o XLSX, agrupando por rótulo, soma coisas que não são a mesma coisa. No tidy o problema já está resolvido pela coluna `tributo`, que é desambiguada — mas é uma armadilha real para quem baixar o arquivo da RFB e trabalhar nele.",
+      "impacto": "medio"
+    },
+    {
+      "titulo": "Nominal engana em 30 anos de série",
+      "texto": "A série começa em 1994, meses depois do Plano Real. Em valores correntes, 1995 arrecadou R$ 119 bilhões e 2025 arrecadou R$ 2.887 bilhões — crescimento de 24×. Em valores constantes de dez/2025, os mesmos anos são R$ 772 bilhões e R$ 2.928 bilhões: crescimento de 3,8×. A diferença entre 24× e 3,8× é inflação. Use `valor_constante` em qualquer comparação que atravesse mais de dois ou três anos.",
+      "impacto": "alto"
+    }
+  ],
+
+  "comparativos": [
+    {
+      "id": "C1",
+      "titulo": "Metade da arrecadação está em dois tributos",
+      "pergunta": "Quão concentrada é a arrecadação federal, e a concentração mudou em 30 anos?",
+      "colunas": ["ano_mes", "tributo", "tipo", "valor_constante"],
+      "o_que_esperar": "Medido em 2025: Imposto de Renda 31,7% e Receita previdenciária 25,2% somam 56,9% do total de R$ 2.887 bilhões. COFINS acrescenta 15,6%. Três rubricas explicam 72,5% de tudo. A pergunta interessante é a trajetória: a concentração aumentou desde 1994, e em favor de quem — do IR (progressivo) ou da previdência (folha)?"
+    },
+    {
+      "id": "C2",
+      "titulo": "Sazonalidade: janeiro, não dezembro",
+      "pergunta": "Qual é o padrão intra-anual da arrecadação?",
+      "colunas": ["ano_mes", "tipo", "valor_constante"],
+      "o_que_esperar": "Contra a intuição de varejo, o pico é janeiro (índice 122,3 com média 100), seguido de dezembro (119,3) e outubro (107,6); o vale é fevereiro (88,3). Janeiro recolhe o que foi apurado em dezembro, o que também explica por que uma leitura mês a mês sem ajuste sazonal atribui a janeiro um mérito que é de dezembro. Vale testar se o padrão é estável ao longo das três décadas ou se mudou com as regras de recolhimento."
+    },
+    {
+      "id": "C3",
+      "titulo": "O buraco que a reforma vai abrir",
+      "pergunta": "Que fatia da arrecadação atual deixa de existir com o fim de PIS/PASEP e COFINS em 2027?",
+      "colunas": ["ano_mes", "tributo", "tipo", "valor_constante"],
+      "o_que_esperar": "PIS/PASEP (4,2%) e COFINS (15,6%) somam 19,8% da arrecadação de 2025 — quase R$ 572 bilhões — e são substituídos pela CBS a partir de 1º/01/2027. A série vai registrar uma quebra estrutural, não uma queda de arrecadação. Este é o gráfico que precisa existir *antes* de 2027, para que a descontinuidade seja lida como mudança de regime e não como colapso de receita."
+    },
+    {
+      "id": "C4",
+      "titulo": "Crescimento real por tributo",
+      "pergunta": "Quais tributos cresceram acima da inflação nas últimas três décadas, e quais encolheram?",
+      "colunas": ["ano_mes", "tributo", "tipo", "valor", "valor_constante"],
+      "o_que_esperar": "O total real cresceu 3,8× de 1995 a 2025. Tributos que cresceram menos que isso perderam participação. O IPI é o candidato natural a encolhimento real (desindustrialização e desonerações sucessivas); o IR e a previdência, a ganho. Comparar CAGR real por tributo contra o CAGR real do total separa 'cresceu' de 'ganhou espaço'."
+    }
+  ],
+
+  "contexto_externo": [
+    {
+      "titulo": "Reforma tributária: fase de teste em 2026, CBS valendo em 2027",
+      "resumo": "Em 2026 vigora uma alíquota-teste de 0,9% de CBS e 0,1% de IBS, meramente informativa e compensada na apuração de PIS/Cofins. Em 1º/01/2027 a CBS e o Imposto Seletivo passam a valer e PIS e Cofins deixam de existir. O IBS entra em transição a partir de 2029, com extinção de ICMS e ISS em 2033.",
+      "numero": "01/01/2027",
+      "fonte": "Câmara dos Deputados",
+      "url": "https://www.camara.leg.br/noticias/1237089-reforma-tributaria-comeca-fase-de-transicao-com-testes-de-novos-impostos-em-2026/",
+      "consultado_em": "2026-08-15",
+      "por_que_importa": "É a maior quebra estrutural que esta série vai sofrer desde que começou. Duas das quatro maiores rubricas somem do gráfico em 2027. Qualquer painel construído agora precisa estar preparado para representar isso."
+    },
+    {
+      "titulo": "A série histórica da RFB só vai até 2025",
+      "resumo": "A página de série histórica do ReceitaData oferecia, em 15/08/2026, apenas os arquivos 'arrecadacao-das-receitas-federais-1970-a-1993.xlsx' e '1994-a-2025.xlsx'. Não há arquivo consolidado de 2026.",
+      "numero": "dez/2025",
+      "fonte": "Receita Federal — ReceitaData, série histórica",
+      "url": "https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/dados-abertos/receitadata/arrecadacao/serie-historica",
+      "consultado_em": "2026-08-15",
+      "por_que_importa": "Confirma que a defasagem é da origem. Fecha a dúvida de 'o pipeline está quebrado?' — não está; a RFB consolida a série anualmente."
+    },
+    {
+      "titulo": "2026 corrente é recorde real, mas fora desta série",
+      "resumo": "A RFB registrou R$ 222,1 bilhões em fevereiro de 2026 (+5,68% real sobre fev/2025) e R$ 229,2 bilhões em março (+4,99% real), melhor resultado para o mês desde o início da série em 2000. O primeiro semestre de 2026 somou R$ 1,61 trilhão.",
+      "numero": "R$ 1,61 tri no 1º sem/2026",
+      "fonte": "Ministério da Fazenda / Agência Brasil",
+      "url": "https://www.gov.br/fazenda/pt-br/assuntos/noticias/2026/abril/arrecadacao-federal-atinge-r-229-2-bilhoes-em-marco-de-2026-melhor-resultado-para-o-mes-desde-2000",
+      "consultado_em": "2026-08-15",
+      "por_que_importa": "Dá ao painel um número de referência para o período que a série ainda não cobre — e mostra que a tendência de 2025 continuou, o que é relevante para não deixar o leitor concluir que a arrecadação parou em dez/2025."
+    }
+  ],
+
+  "cruzamentos": [
+    {
+      "com_fonte": "meios_pagamento_mensal",
+      "chave": "ano_mes",
+      "pergunta": "Os picos de TED coincidem com os meses e datas de maior recolhimento? Se sim, parte do volume de TED é infraestrutura de arrecadação, e o split tributário do Pix (em desenvolvimento pelo BCB) tende a migrar esse fluxo.",
+      "cuidado": "Esta série termina em dez/2025 e a de meios de pagamento vai até jun/2026 — recorte o período comum antes de comparar. Ambas em R$ milhões, mas esta tem versão deflacionada e a outra não."
+    },
+    {
+      "com_fonte": "credito_modalidade",
+      "chave": "ano_mes",
+      "pergunta": "A arrecadação de IRPJ/CSLL de entidades financeiras acompanha o spread bancário? A hierarquia desta fonte isola justamente 'ENTIDADES FINANCEIRAS' dentro de IRPJ e CSLL.",
+      "cuidado": "Arrecadação é fluxo mensal e crédito é estoque; e o lucro tributado tem defasagem em relação ao spread que o gerou. Espere correlação com lag, não contemporânea."
+    }
+  ],
+
+  "pauta": [
+    {
+      "id": "V1",
+      "titulo": "Composição da arrecadação ao longo de 30 anos",
+      "pergunta": "Como a fatia de cada tributo mudou desde 1994, em termos reais?",
+      "tabela": "tidy",
+      "colunas": ["ano_mes", "tributo", "tipo", "valor_constante"],
+      "tipo_grafico": "área empilhada 100%, anual, só `tipo = componente`",
+      "por_que_esse_tipo": "Trinta anos em base mensal são 384 pontos — ruído demais para ler composição. Agregar por ano preserva a tendência estrutural e elimina a sazonalidade, que é assunto de outro gráfico. O filtro por `componente` é obrigatório, senão a soma passa de 100%.",
+      "status": "proposto",
+      "prioridade": "alta",
+      "esforco": "medio",
+      "comentario": "",
+      "decidido_em": null
+    },
+    {
+      "id": "V2",
+      "titulo": "Nominal x real, a mesma série",
+      "pergunta": "Quanto do crescimento de 24× é inflação?",
+      "tabela": "tidy",
+      "colunas": ["ano_mes", "valor", "valor_constante"],
+      "tipo_grafico": "linha dupla em escala log, com a razão entre as duas num eixo secundário",
+      "por_que_esse_tipo": "Em escala linear a curva nominal esmaga os anos 1990 contra o eixo e a comparação some. Log torna taxas de crescimento comparáveis visualmente — é o caso clássico em que log não é preciosismo, é a única leitura honesta.",
+      "status": "proposto",
+      "prioridade": "alta",
+      "esforco": "baixo",
+      "comentario": "",
+      "decidido_em": null
+    },
+    {
+      "id": "V3",
+      "titulo": "Relógio sazonal",
+      "pergunta": "Qual o índice sazonal de cada mês, e ele mudou ao longo das décadas?",
+      "tabela": "tidy",
+      "colunas": ["ano_mes", "tipo", "valor_constante"],
+      "tipo_grafico": "heatmap mês × ano do índice sazonal (média do ano = 100)",
+      "por_que_esse_tipo": "Um heatmap responde as duas perguntas de uma vez: a cor da coluna de janeiro mostra o padrão, e a variação da cor ao longo das linhas mostra se ele é estável. Uma linha de 12 pontos só responderia a primeira.",
+      "status": "proposto",
+      "prioridade": "media",
+      "esforco": "medio",
+      "comentario": "",
+      "decidido_em": null
+    },
+    {
+      "id": "V4",
+      "titulo": "Contador da reforma: o que sai em 2027",
+      "pergunta": "Qual o tamanho, hoje, do que a CBS vai substituir?",
+      "tabela": "tidy",
+      "colunas": ["ano_mes", "tributo", "tipo", "valor_constante"],
+      "tipo_grafico": "KPI destacado + série de PIS/PASEP + COFINS com a data de 01/01/2027 anotada",
+      "por_que_esse_tipo": "É a informação com maior valor de uso da fonte inteira e ela cabe num número: 19,8% da arrecadação, R$ 572 bilhões em 2025. O gráfico ao lado dá o histórico; o KPI dá a manchete.",
+      "status": "proposto",
+      "prioridade": "alta",
+      "esforco": "baixo",
+      "comentario": "",
+      "decidido_em": null
+    },
+    {
+      "id": "V5",
+      "titulo": "Navegador da hierarquia",
+      "pergunta": "O que tem dentro de cada tributo?",
+      "tabela": "aux_hierarquia",
+      "colunas": ["tributo", "tributo_pai", "nivel", "tipo", "valor_constante"],
+      "tipo_grafico": "treemap de dois níveis, ou tabela expansível pai → filhos",
+      "por_que_esse_tipo": "A hierarquia é a característica distintiva desta fonte e hoje ela não aparece no painel — o usuário vê uma lista chapada de 38 tributos sem saber quais estão dentro de quais. Treemap comunica proporção e aninhamento ao mesmo tempo; a tabela expansível é a alternativa barata e acessível.",
+      "status": "proposto",
+      "prioridade": "media",
+      "esforco": "alto",
+      "comentario": "",
+      "decidido_em": null
+    },
+    {
+      "id": "V6",
+      "titulo": "Aviso de defasagem no cabeçalho",
+      "pergunta": "O leitor sabe que está olhando dezembro de 2025?",
+      "tabela": "tidy",
+      "colunas": ["ano_mes"],
+      "tipo_grafico": "faixa de aviso no topo, com o último mês da série e o motivo",
+      "por_que_esse_tipo": "Não é visualização, é honestidade. Um painel que mostra 'arrecadação federal' em agosto de 2026 com dados de dezembro de 2025 induz a erro se não disser isso na primeira dobra. Custa dez linhas de HTML.",
+      "status": "proposto",
+      "prioridade": "alta",
+      "esforco": "baixo",
+      "comentario": "",
+      "decidido_em": null
+    }
+  ],
+
+  "perguntas_abertas": [
+    "A RFB publica os meses de 2026 em algum formato estruturado (CSV/XLSX) nos relatórios mensais de Análise da Arrecadação, ou só em PDF? Se houver formato tabular, dá para estender o pipeline com uma segunda fonte e fechar a defasagem de 8 meses.",
+    "Os valores de anos anteriores são revisados quando a RFB republica a série histórica? Se sim, o `valor` de 1998 hoje pode não ser o de dois anos atrás — e nenhum registro no repositório permitiria perceber. Guardar o perfil de cada coleta resolveria.",
+    "A identidade 'soma dos componentes = total geral' fecha nos 384 meses, o que é ótimo. Mas o TOTAL das abas do XLSX confere com essa soma? O pipeline descarta a coluna TOTAL sem comparar — vale checar antes de confiar cegamente na reconstrução."
+  ]
+}

@@ -60,11 +60,16 @@ fonte-arrecadacao-federal/
 │   ├── coleta/arrecadacao_federal.py       # Etapa 2 (XLSX + IPCA)
 │   ├── tratamento/arrecadacao_federal.py   # Etapa 3 (tidy + deflação)
 │   ├── analise/arrecadacao_federal.py      # Etapa 4
+│   ├── perfil/arrecadacao_federal.py       # Etapa E (+ perfil/nucleo.py)
 │   └── publicacao/arrecadacao_federal.py   # Etapa 5
 ├── dados/
 │   ├── brutos/                 # XLSX baixados + IPCA (regeneráveis; fora do git)
 │   └── processados/            # CSV tidy
-├── docs/                       # Etapa 6 — site publicado
+├── docs/                       # Etapas 6 e E — site publicado
+│   ├── explorar.html                   # Etapa E — perfil + pauta analitica
+│   ├── js/explorar.js
+│   ├── dados/perfil_arrecadacao_federal.json  # Etapa E (gerado)
+│   ├── dados/notas_arrecadacao_federal.json   # Etapa E (a mao, nunca sobrescrito)
 │   ├── index.html
 │   ├── css/estilo.css
 │   ├── js/app.js
@@ -84,6 +89,16 @@ fonte-arrecadacao-federal/
                 ──Etapa 4──▶ métricas          ──Etapa 5──▶ docs/dados/arrecadacao_federal.json
                                                         │
                                                    ──Etapa 6──▶ docs/index.html
+
+               ──Etapa E──▶  docs/dados/perfil_arrecadacao_federal.json  (gerado)
+                             docs/dados/notas_arrecadacao_federal.json   (a mao)
+                                     └──▶ docs/explorar.html
+
+**Etapa E.** Roda depois da Etapa 3 e antes da 4. Perfila cinco tabelas (aba anual
+representativa do XLSX, tidy, inventario das 41 abas, IPCA e hierarquia de tributos) e
+mede os quatro joins entre elas. Especificacao completa no repositorio `controle-global`,
+em `prompts/modelo-pagina-exploracao.md`. **A Etapa E so adiciona:** a unica alteracao em
+arquivo existente foi o link "Explorar dados" na navegacao do `index.html`.
 ```
 
 | Etapa | Nome | Código | Entrada → Saída | Status |
@@ -92,6 +107,7 @@ fonte-arrecadacao-federal/
 | 2 | Ingestão / coleta | `src/coleta/` | XLSX + IPCA → arquivos brutos | ✅ |
 | 3 | Tratamento & modelagem | `src/tratamento/` | brutos → CSV tidy (+ deflação) | ✅ |
 | 4 | Análise estatística | `src/analise/` | CSV tidy → métricas | ✅ |
+| E | Exploração & pauta | `src/perfil/`, `docs/explorar.html` | bruto + tidy + auxiliares → perfil + pauta | ✅ |
 | 5 | Publicação de dados | `src/publicacao/` | tidy + métricas → JSON do front | ✅ |
 | 6 | Dashboard | `docs/` | JSON → site interativo | ✅ |
 | 7 | Documentação & deploy | `README.md`, GitHub Pages | — → site no ar | 🟡 |

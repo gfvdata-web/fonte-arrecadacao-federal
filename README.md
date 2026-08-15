@@ -5,6 +5,7 @@ valor arrecadado mensal por tributo no Brasil de 1994 em diante, a preços corre
 constantes (deflacionados pelo IPCA), a partir dos arquivos XLSX do portal ReceitaData.
 
 **Painel publicado:** https://gfvdata-web.github.io/fonte-arrecadacao-federal/
+**Explorar os dados (Etapa E):** https://gfvdata-web.github.io/fonte-arrecadacao-federal/explorar.html
 
 > 📄 Organização do repositório e etapas do pipeline: **[CONTEXTO.md](CONTEXTO.md)**
 > 📚 Dicionário de dados da fonte: **[catalogo/fonte.md](catalogo/fonte.md)**
@@ -32,6 +33,11 @@ Para ver o dashboard localmente:
 python -m http.server 8000 --directory docs
 ```
 
+> **Etapa E.** `python run_pipeline.py --sem-perfil` pula a perfilagem.
+> `docs/dados/notas_arrecadacao_federal.json` é **escrito à mão** e nenhum script o sobrescreve:
+> é onde ficam as armadilhas, os comparativos, o contexto externo pesquisado e a pauta
+> de visualizações que alimentam a página `explorar.html`.
+
 ## Estrutura
 
 | Pasta | Etapa | Papel |
@@ -40,8 +46,10 @@ python -m http.server 8000 --directory docs
 | `src/coleta/` | 2 | Download dos XLSX + IPCA → `dados/brutos/` |
 | `src/tratamento/` | 3 | Tidy + deflação → `dados/processados/` |
 | `src/analise/` | 4 | Estatística e métricas |
+| `src/perfil/` | E | Perfil das tabelas → `docs/dados/perfil_*.json` |
 | `src/publicacao/` | 5 | JSON → `docs/dados/` |
-| `docs/` | 6 | Dashboard (site publicado) |
+| `docs/index.html` | 6 | Dashboard (site publicado) |
+| `docs/explorar.html` | E | Perfil das tabelas + pauta analítica |
 | `prompts/` | — | Prompt de abertura de sessão desta fonte |
 
 ## Licença dos dados
