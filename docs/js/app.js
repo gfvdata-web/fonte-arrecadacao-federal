@@ -7,11 +7,11 @@ const ARQUIVO_DADOS = "dados/arrecadacao_federal.json";
 
 // Paleta categórica: 15 tributos, na ordem de volume arrecadado.
 const PALETA = [
-  "#2563eb", "#0ea5a4", "#f59e0b", "#8b5cf6", "#ec4899",
+  "#1351b4", "#0ea5a4", "#f59e0b", "#8b5cf6", "#ec4899",
   "#059669", "#ef4444", "#0891b2", "#a16207", "#7c3aed",
   "#db2777", "#65a30d", "#0369a1", "#c2410c", "#94a3b8",
 ];
-const COR_TOTAL = "#0f172a";
+const COR_TOTAL = "#17212b";
 const TRIBUTOS_VISIVEIS = 5; // demais séries começam ocultas na legenda
 
 let dados = null;

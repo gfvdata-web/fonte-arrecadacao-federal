@@ -5,12 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Arrecadação Federal por Tributo — Painel Analítico</title>
   <link rel="stylesheet" href="css/estilo.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script data-goatcounter="https://gfvdata.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
   <header class="cabecalho">
     <div class="conteiner">
+      <p class="migalha">Dados abertos › Arrecadação Federal</p>
       <p class="sobrelinha">Receita Federal do Brasil · Dados Abertos</p>
       <h1>Arrecadação Federal por Tributo</h1>
       <p class="subtitulo" id="descricao-fonte">Valor arrecadado mensal por tributo no Brasil.</p>
@@ -58,12 +62,12 @@
 
     <!-- Gráficos -->
     <section class="graficos">
-      <article class="cartao grafico-grande">
+      <article class="cartao grafico-grande" data-bloco="Gráfico">
         <h2>Evolução da arrecadação</h2>
         <p class="cartao-desc" id="titulo-evolucao">Total e tributos ao longo do tempo.</p>
         <div class="canvas-wrap"><canvas id="gEvolucao"></canvas></div>
       </article>
-      <article class="cartao">
+      <article class="cartao" data-bloco="Gráfico">
         <h2>Participação por tributo</h2>
         <p class="cartao-desc" id="titulo-participacao">Fatia de cada tributo no período.</p>
         <div class="canvas-wrap"><canvas id="gParticipacao"></canvas></div>
@@ -71,7 +75,7 @@
     </section>
 
     <!-- Ranking -->
-    <section class="cartao">
+    <section class="cartao" data-bloco="Tabela">
       <div class="cartao-cabecalho">
         <div class="cartao-titulo">
           <h2>Ranking e métricas por tributo</h2>

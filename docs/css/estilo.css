@@ -1,19 +1,25 @@
 /* ===== Painéis de dados financeiros abertos — Etapa 6 =====
-   Folha compartilhada por todas as páginas (index.html, arrecadacao-federal.html). */
+   Folha compartilhada por todas as páginas (index.html, explorar.html).
+   Tema: Serviço Público Digital + Workspace — institucional (gov.br) mesclado
+   com o padrão de página de base de dados (Notion): metadados como propriedades,
+   tendência como etiqueta suave, gráfico tratado como bloco incorporado. */
 :root {
-  --bg: #f4f6fb;
+  --bg: #f3f5f4;
   --superficie: #ffffff;
-  --borda: #e2e8f0;
-  --texto: #0f172a;
-  --texto-suave: #64748b;
-  --acento: #2563eb;
-  --acento-suave: #dbeafe;
-  --positivo: #059669;
-  --negativo: #dc2626;
-  --sombra: 0 1px 3px rgba(15, 23, 42, .08), 0 8px 24px rgba(15, 23, 42, .04);
-  --raio: 14px;
+  --borda: #dfe3e6;
+  --texto: #17212b;
+  --texto-suave: #5b6670;
+  --acento: #1351b4;
+  --acento-cabecalho: #1351b4;
+  --amarelo: #ffcd07;
+  --acento-suave: #e8f0fb;
+  --positivo: #168821;
+  --negativo: #c22323;
+  --sombra: 0 1px 2px rgba(15, 31, 51, .05);
+  --raio: 8px;
+  --fonte-dado: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
 
-  /* Paleta categórica das formas de pagamento */
+  /* Paleta categórica das formas de pagamento (mantida por compatibilidade entre fontes) */
   --c-pix: #0ea5a4;
   --c-ted: #2563eb;
   --c-boleto: #f59e0b;
@@ -24,14 +30,16 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0b1120;
-    --superficie: #131c31;
-    --borda: #24304a;
-    --texto: #e8edf7;
-    --texto-suave: #93a1bd;
-    --acento: #60a5fa;
-    --acento-suave: #1e3a5f;
-    --sombra: 0 1px 3px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+    --bg: #0d1117;
+    --superficie: #151b23;
+    --borda: #262f3a;
+    --texto: #e7edf3;
+    --texto-suave: #93a1b0;
+    --acento: #5b9bf0;
+    --acento-suave: #1c2e4a;
+    --positivo: #34d399;
+    --negativo: #f87171;
+    --sombra: 0 1px 2px rgba(0, 0, 0, .3);
   }
 }
 
@@ -39,7 +47,7 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Public Sans', system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: var(--bg);
   color: var(--texto);
   line-height: 1.5;
@@ -49,17 +57,25 @@ body {
 
 /* Cabeçalho */
 .cabecalho {
-  background: linear-gradient(135deg, var(--acento), #1e40af);
+  background: var(--acento-cabecalho);
   color: #fff;
-  padding: 40px 0 32px;
+  padding: 20px 0 28px;
+  border-bottom: 4px solid var(--amarelo);
+}
+.cabecalho .migalha {
+  margin: 0 0 14px; font-size: .78rem; opacity: .82;
 }
 .cabecalho .sobrelinha {
   text-transform: uppercase; letter-spacing: .08em; font-size: .78rem;
   opacity: .85; margin: 0 0 6px;
 }
-.cabecalho h1 { margin: 0; font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 700; }
+.cabecalho h1 { margin: 0; font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; }
 .cabecalho .subtitulo { margin: 8px 0 0; opacity: .92; max-width: 60ch; }
-.cabecalho .meta-info { margin: 14px 0 0; font-size: .82rem; opacity: .8; }
+.cabecalho .meta-info {
+  display: inline-block; margin: 16px 0 0; font-size: .74rem; opacity: .95;
+  font-family: var(--fonte-dado); background: rgba(255, 255, 255, .14);
+  border: 1px solid rgba(255, 255, 255, .28); border-radius: 6px; padding: 5px 10px;
+}
 
 /* Navegação entre os painéis */
 .nav-paineis { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; }
@@ -95,19 +111,32 @@ main { padding: 24px 0 48px; }
   gap: 16px; margin-bottom: 24px;
 }
 .kpi {
-  background: var(--superficie); border: 1px solid var(--borda);
-  border-radius: var(--raio); padding: 18px 20px; box-shadow: var(--sombra);
+  background: var(--superficie); border: 1px solid var(--borda); border-left: 4px solid var(--acento);
+  border-radius: 4px; padding: 16px 18px; box-shadow: var(--sombra);
 }
 .kpi .rotulo { font-size: .8rem; color: var(--texto-suave); margin: 0 0 6px; }
-.kpi .valor { font-size: 1.55rem; font-weight: 700; margin: 0; letter-spacing: -.02em; }
-.kpi .apoio { font-size: .78rem; color: var(--texto-suave); margin: 4px 0 0; }
-.kpi .apoio.pos { color: var(--positivo); }
-.kpi .apoio.neg { color: var(--negativo); }
+.kpi .valor { font-family: var(--fonte-dado); font-size: 1.45rem; font-weight: 700; margin: 0; letter-spacing: -.01em; }
+.kpi .apoio {
+  display: inline-block; font-size: .74rem; color: var(--texto-suave); margin: 8px 0 0;
+}
+.kpi .apoio.pos { color: var(--positivo); background: #edf3ec; border-radius: 999px; padding: 2px 9px; font-weight: 600; }
+.kpi .apoio.neg { color: var(--negativo); background: #fdebec; border-radius: 999px; padding: 2px 9px; font-weight: 600; }
+@media (prefers-color-scheme: dark) {
+  .kpi .apoio.pos { background: rgba(52, 211, 153, .14); }
+  .kpi .apoio.neg { background: rgba(248, 113, 113, .14); }
+}
 
 /* Cartões e gráficos */
 .cartao {
   background: var(--superficie); border: 1px solid var(--borda);
   border-radius: var(--raio); padding: 22px; box-shadow: var(--sombra); margin-bottom: 24px;
+  position: relative;
+}
+.cartao[data-bloco] { padding-top: 26px; }
+.cartao[data-bloco]::before {
+  content: attr(data-bloco); position: absolute; top: -9px; left: 20px;
+  background: var(--superficie); padding: 0 7px; font-family: var(--fonte-dado);
+  font-size: .66rem; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave);
 }
 .cartao h2 { margin: 0; font-size: 1.05rem; }
 .cartao-desc { margin: 4px 0 16px; color: var(--texto-suave); font-size: .86rem; }
@@ -147,9 +176,10 @@ main { padding: 24px 0 48px; }
 .tabela-wrap { overflow-x: auto; }
 .tabela { width: 100%; border-collapse: collapse; font-size: .88rem; min-width: 560px; }
 .tabela th, .tabela td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--borda); }
-.tabela th { color: var(--texto-suave); font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
-.tabela td.num, .tabela th.num { text-align: right; font-variant-numeric: tabular-nums; }
-.tabela tbody tr:hover { background: var(--acento-suave); }
+.tabela th { color: var(--texto); background: var(--bg); font-weight: 700; font-size: .74rem; text-transform: uppercase; letter-spacing: .03em; border-bottom: 2px solid var(--borda); }
+.tabela td.num, .tabela th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--fonte-dado); }
+.tabela tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--bg) 55%, var(--superficie)); }
+.tabela tbody tr:hover td { background: var(--acento-suave); }
 .pilula { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; }
 .ponto { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .pos { color: var(--positivo); }
@@ -277,10 +307,17 @@ main { padding: 24px 0 48px; }
   color: var(--texto-suave); background: var(--bg);
 }
 .nota-curada {
-  border-left: 3px solid var(--acento); background: var(--acento-suave);
-  padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: .88rem; margin-top: 18px;
+  display: flex; gap: 10px; align-items: flex-start;
+  border: 1px solid var(--borda); background: #fffbe8;
+  padding: 12px 16px; border-radius: 6px; font-size: .88rem; margin-top: 18px;
 }
-@media (prefers-color-scheme: dark) { .nota-curada { background: rgba(96, 165, 250, .1); } }
+.nota-curada::before {
+  content: ""; width: 18px; height: 18px; border-radius: 5px; background: var(--amarelo);
+  flex-shrink: 0; margin-top: 2px;
+}
+@media (prefers-color-scheme: dark) {
+  .nota-curada { background: rgba(255, 205, 7, .08); }
+}
 
 /* Cartões de conteúdo curado -------------------------------------------- */
 .grade-cartoes {
