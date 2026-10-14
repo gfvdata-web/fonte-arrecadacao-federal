@@ -89,7 +89,7 @@ Fonte: https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2011/lei/l12546.htm
 
 A recessão mais longa da série do Codace reduz a base de tributos sobre lucro, consumo e folha; a arrecadação real cai em 2015 e 2016.
 
-Fonte: https://www.infomoney.com.br/economia/brasil-entrou-em-recessao-a-partir-do-1o-trimestre-de-2020-diz-comite-da-fgv/
+Fonte: https://blogdoibre.fgv.br/posts/chegou-ao-fim-quarta-pior-recessao-brasileira-dos-ultimos-150-anos
 
 ## abr/2020 — Adiamento de tributos na pandemia
 *Tributos: COFINS, PIS/PASEP, Receita previdenciária, Total*
