@@ -44,12 +44,14 @@ class TestDeployYml(unittest.TestCase):
         self.assertRegex(DEPLOY, r"on:\n  push:\n    branches: \[main\]")
         self.assertIn("workflow_dispatch:", DEPLOY)
 
-    def test_usa_wrangler_action_com_segredo_e_conta_do_wrangler(self):
-        self.assertIn("cloudflare/wrangler-action@v3", DEPLOY)
+    def test_usa_wrangler_4_fixo_com_segredo_e_conta_do_wrangler(self):
+        # wrangler-action@v3 instala o wrangler 3, que recusa Worker só de assets.
+        self.assertNotIn("uses: cloudflare/wrangler-action", DEPLOY)
+        self.assertRegex(DEPLOY, r"npx --yes wrangler@4\.\d+\.\d+ deploy")
         self.assertIn("secrets.CLOUDFLARE_API_TOKEN", DEPLOY)
-        self.assertIn("command: deploy", DEPLOY)
-        self.assertIn(f"accountId: {WRANGLER['account_id']}", DEPLOY)
+        self.assertIn(f"CLOUDFLARE_ACCOUNT_ID: {WRANGLER['account_id']}", DEPLOY)
         self.assertIn("actions/checkout@", DEPLOY)
+        self.assertIn("actions/setup-node@", DEPLOY)
 
     def test_sem_token_so_avisa_e_nao_publica(self):
         self.assertRegex(DEPLOY, r"if: steps\.token\.outputs\.ok == 'sim'")
