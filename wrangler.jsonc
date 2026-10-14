@@ -1,0 +1,12 @@
+// Site estático (docs/) servido por um Worker só de assets, sem código.
+{
+  "name": "arrecadacao-federal",
+  "account_id": "24bbd7ba409d9e38e4636846172bd76d",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./docs"
+  },
+  "routes": [{ "pattern": "arrecadacaofederal.gfvdata.com", "custom_domain": true }],
+  "workers_dev": false,
+  "preview_urls": false
+}

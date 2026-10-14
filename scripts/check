@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Checagem do repo. Sem argumento: tudo. Com um arquivo: só o que vale para ele.
+# Silencioso quando passa; sai com 1 e uma mensagem curta quando falha.
+# Sem rede, sem tokens, sem navegador, sem os XLSX brutos (gitignorados): usa tests/fixtures/.
+# Chamado pelo hook global (~/.claude/hooks/run-check.sh) depois de cada edição e
+# pelo .githooks/pre-commit (modo completo) antes de cada commit.
+#
+# Cobertura (cada linha tem teste; "(sem teste: motivo)" onde não dá sem rede/navegador):
+#   Contrato dos dados publicados em docs/dados/                       tests/test_contrato_dados.py
+#     arrecadacao_federal.json (meta.periodo, labels contínuas, 15 tributos, séries = labels,
+#     componentes ~ total, kpis x séries), eventos_*.json (campos, YYYY-MM em ordem, tributos
+#     em tributos U {"Total"}, fonte https), notas_*.json (comparativo C3 do painel),
+#     perfil_*.json, arrecadacao_federal_mensal.csv (colunas, cobertura = JSON)
+#   Páginas V2: index.html, skill.html                                  tests/test_paginas.py
+#     links locais, ids do app-v2.js x HTML, nav só Painel + Skill Claude, sem link para v1/ ou
+#     explorar, GoatCounter, CDN com versão fixa, alternador de tema, zip/CSV da skill
+#   Páginas V1 arquivadas (docs/v1/)                                    tests/test_paginas.py
+#     existem, noindex, links locais, dados lidos de ../dados/
+#   JS do painel (app-v2.js) com DOM e Chart.js falsos                  tests/js/paginas.test.js
+#     carga dos 3 JSON sem erro, narrativas (abertura/meio/eventos/fechamento), participação 100%,
+#     formatação, períodos, CAGR/soma móvel, troca de foco/período/tema, nota da reforma, JSON ausente
+#   Sintaxe: .py, JSON, CSV, node --check (docs/**/*.js, tests/js, <script> inline) tests/test_sintaxe.py
+#   Pipeline: análise (tidy mínimo), publicação (JSON + cópia do CSV), orquestrador tests/test_pipeline.py
+#   Skill do Claude (SKILL.md, carregar_dados.py --arquivo offline, zip em dia, eventos.md = JSON) tests/test_skill.py
+#   Publicação: wrangler.jsonc, .github/workflows/deploy.yml, requirements, .gitignore tests/test_automacao.py
+#   (sem teste: coleta real do gov.br e da API do IPCA, tratamento do XLSX bruto e perfil — exigem
+#    rede/arquivos gitignorados; CDN do Chart.js, deploy na Cloudflare, desenho dos gráficos e CSS)
+cd "$(dirname "$0")/.." || exit 1
+alvo="$(printf '%s' "${1:-}" | sed 's#\\#/#g')";alvo="${alvo#"$(pwd -W 2>/dev/null || pwd)/"}"; alvo="${alvo#"$(pwd)/"}"
+falhas=0
+export PYTHONDONTWRITEBYTECODE=1 PYTHONIOENCODING=utf-8
+
+# Roda um comando; só mostra a saída (cortada) se falhar.
+rodar() {
+  local saida
+  if ! saida="$("$@" 2>&1)"; then
+    printf '%s\n' "$saida" | tail -40
+    falhas=1
+  fi
+}
+testes_py() { rodar python -m unittest -q "$@"; }
+testes_js() { rodar node --test tests/js/*.test.js; }
+
+case "$alvo" in
+  "")
+    rodar python -m unittest discover -q -s tests -t .
+    testes_js
+    ;;
+  src/*.py|run_pipeline.py) testes_py tests.test_pipeline tests.test_skill tests.test_sintaxe ;;
+  tests/js/*.js)            testes_js; rodar node --check "$alvo" ;;
+  tests/fixtures/*)         testes_py tests.test_pipeline tests.test_sintaxe ;;
+  tests/test_*.py)          m="${alvo%.py}"; testes_py "${m//\//.}" ;;
+  tests/*.py)               testes_py tests.test_sintaxe ;;
+  .github/*|wrangler.jsonc|requirements.txt|.gitignore) testes_py tests.test_automacao ;;
+  skill/*)                  testes_py tests.test_skill tests.test_sintaxe ;;
+  docs/js/*.js)             rodar node --check "$alvo"; testes_js; testes_py tests.test_paginas ;;
+  docs/v1/*)                testes_py tests.test_paginas tests.test_sintaxe ;;
+  docs/dados/*)             testes_py tests.test_contrato_dados tests.test_sintaxe tests.test_skill; testes_js ;;
+  docs/skill/*)             testes_py tests.test_skill tests.test_paginas ;;
+  docs/*.html|docs/css/*)   testes_py tests.test_paginas tests.test_sintaxe ;;
+  *)                        : ;;
+esac
+exit $falhas

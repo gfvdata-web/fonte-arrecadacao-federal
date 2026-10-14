@@ -3,164 +3,127 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arrecadação Federal por Tributo — Painel Analítico</title>
-  <link rel="stylesheet" href="css/estilo.css" />
+  <title>Quanto o Brasil arrecada</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/estilo-v2.css" />
+  <script>try{var t=localStorage.getItem("tema-v2");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
   <script data-goatcounter="https://gfvdata.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
-  <header class="cabecalho">
+  <div class="tema-switch-v2" id="tema-switch-v2" role="group" aria-label="Tema da página">
+    <button type="button" class="tema-switch-v2__btn" data-tema="light" aria-pressed="false">
+      <span aria-hidden="true">☀️</span><span class="tema-switch-v2__label">Claro</span>
+    </button>
+    <button type="button" class="tema-switch-v2__btn" data-tema="dark" aria-pressed="false">
+      <span aria-hidden="true">🌙</span><span class="tema-switch-v2__label">Escuro</span>
+    </button>
+  </div>
+
+  <header class="cabecalho-v2">
     <div class="conteiner">
-      <p class="migalha">Dados abertos › Arrecadação Federal</p>
-      <p class="sobrelinha">Receita Federal do Brasil · Dados Abertos</p>
-      <h1>Arrecadação Federal por Tributo</h1>
-      <p class="subtitulo" id="descricao-fonte">Valor arrecadado mensal por tributo no Brasil.</p>
-      <p class="meta-info" id="meta-info">Carregando…</p>
+      <p class="sobrelinha">Dados Abertos · Receita Federal do Brasil</p>
+      <h1>Quanto o Brasil arrecada</h1>
+      <p class="subtitulo">Trinta anos de tributos federais, mês a mês, a preços de hoje: de onde vem o dinheiro e como essa origem mudou.</p>
       <nav class="nav-paineis" aria-label="Painéis do projeto">
         <a href="index.html" aria-current="page">Painel</a>
-        <a href="explorar.html">Explorar dados</a>
-        <span class="nav-sep"></span>
-        <a href="https://meiospagamento.gfvdata.com/">Meios de pagamento</a>
-        <a href="https://gfvdata-web.github.io/fonte-credito-modalidade/">Crédito por modalidade</a>
+        <a href="skill.html">Skill Claude</a>
       </nav>
     </div>
   </header>
 
   <main class="conteiner">
-    <!-- Controles: base de preços e granularidade -->
-    <section class="controles" aria-label="Base de preços">
-      <span class="controles-rotulo">Preços:</span>
-      <div class="alternador" role="tablist">
-        <button class="alt-btn ativo" data-base="corrente" role="tab">Correntes</button>
-        <button class="alt-btn" data-base="constante" role="tab">Constantes (IPCA)</button>
-      </div>
-      <span class="controles-rotulo">Granularidade:</span>
-      <div class="alternador" role="tablist">
-        <button class="alt-btn ativo" data-granularidade="anual" role="tab">Anual</button>
-        <button class="alt-btn" data-granularidade="mensal" role="tab">Mensal</button>
-      </div>
+
+    <!-- Abertura narrativa -->
+    <section class="narrativa narrativa-abertura">
+      <p id="txt-abertura">Carregando a série histórica…</p>
     </section>
 
-    <!-- Filtro de período global -->
-    <section class="controles" aria-label="Período analisado">
-      <span class="controles-rotulo">Período:</span>
-      <div class="filtro-periodo" role="group">
-        <label class="filtro-campo">De
-          <select id="periodo-inicio" class="sel-mes" aria-label="Mês inicial do período"></select>
-        </label>
-        <label class="filtro-campo">Até
-          <select id="periodo-fim" class="sel-mes" aria-label="Mês final do período"></select>
-        </label>
-      </div>
-    </section>
-
-    <!-- KPIs -->
-    <section class="kpis" id="kpis" aria-label="Indicadores-chave"></section>
-
-    <!-- Gráficos -->
-    <section class="graficos">
-      <article class="cartao grafico-grande" data-bloco="Gráfico">
-        <h2>Evolução da arrecadação</h2>
-        <p class="cartao-desc" id="titulo-evolucao">Total e tributos ao longo do tempo.</p>
-        <div class="canvas-wrap"><canvas id="gEvolucao"></canvas></div>
-      </article>
-      <article class="cartao" data-bloco="Gráfico">
-        <h2>Participação por tributo</h2>
-        <p class="cartao-desc" id="titulo-participacao">Fatia de cada tributo no período.</p>
-        <div class="canvas-wrap"><canvas id="gParticipacao"></canvas></div>
-      </article>
-    </section>
-
-    <!-- Ranking -->
-    <section class="cartao" data-bloco="Tabela">
-      <div class="cartao-cabecalho">
-        <div class="cartao-titulo">
-          <h2>Ranking e métricas por tributo</h2>
-          <p class="cartao-desc" id="desc-ranking">Arrecadação acumulada, participação, YoY e CAGR no período.</p>
+    <!-- Gráfico 1: composição da arrecadação por ano (colunas empilhadas) -->
+    <article class="cartao-v2">
+      <div class="cartao-v2-cabecalho">
+        <div>
+          <p class="rotulo-secao">Composição por ano</p>
+          <h2>De onde vem a arrecadação</h2>
+          <p class="cartao-v2-desc" id="desc-composicao">Fatia de cada tributo no total arrecadado em cada ano.</p>
+        </div>
+        <div class="filtros-v2">
+          <div class="pilulas" role="tablist" aria-label="Preços do gráfico de composição">
+            <button class="pilula-btn" data-precos-comp="corrente" role="tab">Correntes</button>
+            <button class="pilula-btn ativo" data-precos-comp="constante" role="tab">Constantes</button>
+          </div>
+          <div class="pilulas" role="tablist" aria-label="Período do gráfico de composição" id="periodo-composicao"></div>
         </div>
       </div>
-      <div class="tabela-wrap">
-        <table class="tabela" id="tabela-ranking">
-          <thead>
-            <tr>
-              <th>Tributo</th>
-              <th class="num">Arrecadado</th>
-              <th class="num">Participação</th>
-              <th class="num">Últ. 12 meses</th>
-              <th class="num">YoY</th>
-              <th class="num">CAGR a.a.</th>
-              <th class="num">Pico mensal</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+      <div class="canvas-wrap-v2 canvas-participacao"><div class="canvas-scroll-inner" id="composicaoScrollInner"><canvas id="gComposicao"></canvas></div></div>
+      <p class="legenda-nota">Cada coluna soma 100%. Os seis maiores tributos aparecem separados; os demais ficam em "Demais". Correntes são os valores da época; constantes são corrigidos pelo IPCA até dez/2025.</p>
+      <details class="tabela-expansivel">
+        <summary>Ver tabela de participação por ano (%)</summary>
+        <div class="tabela-wrap"><table class="tabela tabela-densa" id="tabela-composicao"><thead></thead><tbody></tbody></table></div>
+      </details>
+    </article>
+
+    <!-- Narrativa intermediária -->
+    <section class="narrativa">
+      <p id="txt-meio">Calculando a mudança de composição…</p>
     </section>
 
-    <!-- Composição interna de um tributo -->
-    <section class="cartao">
-      <div class="cartao-cabecalho">
-        <div class="cartao-titulo">
-          <h2>Composição interna</h2>
-          <p class="cartao-desc" id="desc-composicao">Aberturas publicadas dentro de cada tributo.</p>
+    <!-- Gráfico 2: linha do tempo -->
+    <article class="cartao-v2">
+      <div class="cartao-v2-cabecalho">
+        <div>
+          <p class="rotulo-secao">Linha do tempo</p>
+          <h2>A trajetória de cada tributo</h2>
+          <p class="cartao-v2-desc" id="desc-evolucao">Arrecadação a preços constantes.</p>
         </div>
-        <div class="filtro-periodo" role="group">
-          <label class="filtro-campo">Tributo
-            <select id="composicao-tributo" class="sel-mes" aria-label="Tributo detalhado"></select>
-          </label>
+        <div class="filtros-v2">
+          <div class="pilulas" role="tablist" aria-label="Visão da linha do tempo">
+            <button class="pilula-btn ativo" data-visao-evo="12m" role="tab">12 meses</button>
+            <button class="pilula-btn" data-visao-evo="mensal" role="tab">Mensal</button>
+          </div>
+          <div class="pilulas" role="tablist" aria-label="Período da linha do tempo" id="periodo-evolucao"></div>
         </div>
       </div>
-      <div class="tabela-wrap">
-        <table class="tabela" id="tabela-composicao">
-          <thead>
-            <tr>
-              <th>Abertura</th>
-              <th class="num">Últ. 12 meses</th>
-              <th class="num">Participação no tributo</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <div class="foco-tributo">
+        <span class="foco-tributo-rotulo">Contar a história de:</span>
+        <div class="pilulas" role="tablist" aria-label="Tributo em foco" id="foco-tributo"></div>
       </div>
+      <div class="canvas-wrap-v2"><canvas id="gEvolucao"></canvas></div>
+      <details class="tabela-expansivel">
+        <summary>Ver tabela anual do tributo em foco</summary>
+        <div class="tabela-wrap"><table class="tabela tabela-densa" id="tabela-evolucao"><thead></thead><tbody></tbody></table></div>
+      </details>
+      <div class="eventos-linha-tempo" id="eventos-linha-tempo"></div>
+    </article>
+
+    <!-- Narrativa de fechamento -->
+    <section class="narrativa narrativa-fechamento">
+      <p id="txt-fechamento">Resumindo o período selecionado…</p>
+      <div class="nota-reforma" id="nota-reforma" hidden></div>
     </section>
 
-    <!-- Estatística descritiva -->
-    <section class="cartao">
-      <div class="cartao-cabecalho">
-        <div class="cartao-titulo">
-          <h2>Estatística descritiva</h2>
-          <p class="cartao-desc" id="titulo-estatistica">Sobre a série mensal de cada tributo.</p>
-        </div>
-      </div>
-      <div class="tabela-wrap">
-        <table class="tabela" id="tabela-estatistica">
-          <thead>
-            <tr>
-              <th>Tributo</th>
-              <th class="num">Média</th>
-              <th class="num">Mediana</th>
-              <th class="num">Desvio-padrão</th>
-              <th class="num">Coef. variação</th>
-              <th class="num">Mínimo</th>
-              <th class="num">Máximo</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
+    <!-- Kit para IA: skill do Claude + dados prontos -->
+    <article class="cartao-v2 cartao-ia" id="usar-com-ia">
+      <p class="rotulo-secao">Use estes dados com IA</p>
+      <h2>Faça suas próprias perguntas ao Claude</h2>
+      <p class="cartao-v2-desc">Esta página foi construída com a ajuda do Claude. A mesma preparação está empacotada numa <strong>skill</strong>: um pacote de instruções que ensina o Claude a baixar a série da Receita Federal, a evitar as armadilhas da fonte (dupla contagem entre totais e componentes, valores nominais, tributos que ainda não existiam) e a situar os números nos marcos históricos.</p>
+      <p class="legenda-nota"><a href="skill.html">Veja como instalar a skill em três passos →</a></p>
+      <p class="legenda-nota">Prefere outra ferramenta? Os dados tratados estão em <a href="dados/arrecadacao_federal_mensal.csv" download>arrecadacao_federal_mensal.csv</a> (valores em R$ milhões, correntes e constantes de dez/2025).</p>
+    </article>
+
   </main>
 
-  <footer class="rodape">
+  <footer class="rodape-v2">
     <div class="conteiner">
-      <p id="rodape-fonte"></p>
-      <p class="rodape-obs" id="rodape-obs">Valores em R$ milhões.</p>
+      <p id="rodape-fonte-v2"></p>
+      <p class="rodape-obs">Unidades: R$ milhões, salvo indicação. Projeto de estudo — dados abertos da Receita Federal do Brasil, licença CC-BY-ND 3.0.</p>
     </div>
   </footer>
 
-  <script src="js/app.js"></script>
+  <script src="js/app-v2.js"></script>
 </body>
 </html>

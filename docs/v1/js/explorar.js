@@ -340,7 +340,7 @@
   async function iniciar() {
     let perfil;
     try {
-      perfil = await json(`dados/perfil_${SLUG}.json`);
+      perfil = await json(`../dados/perfil_${SLUG}.json`);
     } catch (e) {
       $("erro").hidden = false;
       $("erro").innerHTML = `<div class="aviso"><b>Perfil não encontrado.</b>
@@ -351,7 +351,7 @@
     }
 
     let notas = null;
-    try { notas = await json(`dados/notas_${SLUG}.json`); } catch { /* metade medida só */ }
+    try { notas = await json(`../dados/notas_${SLUG}.json`); } catch { /* metade medida só */ }
 
     renderResumo(perfil, notas);
     renderMapa(perfil);

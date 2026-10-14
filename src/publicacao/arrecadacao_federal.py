@@ -2,11 +2,13 @@
 
 Reúne a saída da análise (Etapa 4) com metadados da fonte e grava um JSON
 compacto em ``docs/dados/arrecadacao_federal.json``, consumido pela página
-``docs/arrecadacao-federal.html`` (Etapa 6).
+``docs/index.html`` (Etapa 6). Também publica o CSV tidy em
+``docs/dados/arrecadacao_federal_mensal.csv``, origem de dados da skill do Claude.
 """
 from __future__ import annotations
 
 import json
+import shutil
 from datetime import datetime, timezone
 
 from src import config
@@ -45,6 +47,11 @@ def publicar(slug: str = SLUG) -> dict:
     destino.write_text(json.dumps(pacote, ensure_ascii=False, indent=2), encoding="utf-8")
     tamanho = destino.stat().st_size / 1024
     print(f"[publicacao] JSON do dashboard salvo em {destino} ({tamanho:.0f} KB)")
+
+    # CSV tidy também vai para o site: é a origem de dados da skill do Claude.
+    csv_publico = config.DIR_PUBLICADOS / f"{slug}_mensal.csv"
+    shutil.copyfile(config.DIR_PROCESSADOS / f"{slug}.csv", csv_publico)
+    print(f"[publicacao] CSV tidy publicado em {csv_publico}")
     return pacote
 
 

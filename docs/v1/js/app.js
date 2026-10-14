@@ -3,7 +3,7 @@
    O JSON traz só a série mensal; participação, ranking, estatística e a
    agregação anual são recalculados aqui conforme o período selecionado. */
 
-const ARQUIVO_DADOS = "dados/arrecadacao_federal.json";
+const ARQUIVO_DADOS = "../dados/arrecadacao_federal.json";
 
 // Paleta categórica: 15 tributos, na ordem de volume arrecadado.
 const PALETA = [

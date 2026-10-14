@@ -1,4 +1,4 @@
-"""Orquestrador do pipeline — executa as Etapas 2 → E → 5 da fonte deste repositório.
+"""Orquestrador do pipeline — executa as Etapas 2 → E → 5 (+ skill) da fonte deste repositório.
 
 Uso:
     python run_pipeline.py                # pipeline completo
@@ -14,6 +14,7 @@ from src.coleta import arrecadacao_federal as coleta
 from src.tratamento import arrecadacao_federal as tratamento
 from src.perfil import arrecadacao_federal as perfil
 from src.publicacao import arrecadacao_federal as publicacao
+from src.publicacao import skill
 
 
 def rodar(sem_coleta: bool = False, sem_perfil: bool = False) -> None:
@@ -34,6 +35,7 @@ def rodar(sem_coleta: bool = False, sem_perfil: bool = False) -> None:
         perfil.perfilar(config.SLUG)
 
     publicacao.publicar(config.SLUG)
+    skill.empacotar()
     print("=== Pipeline concluído com sucesso ===")
 
 

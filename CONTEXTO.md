@@ -17,7 +17,8 @@ a preços correntes e constantes (deflacionados pelo IPCA).
 
 - **Fonte:** Receita Federal do Brasil, portal ReceitaData — **download de XLSX, não há API**.
   Dicionário completo em [`catalogo/fonte.md`](catalogo/fonte.md).
-- **Entrega:** dashboard estático em `docs/`, publicado via GitHub Pages.
+- **Entrega:** dashboard estático em `docs/`, publicado num Worker de estáticos da Cloudflare
+  (https://arrecadacaofederal.gfvdata.com/). V2 em `docs/index.html`; V1 arquivada em `docs/v1/`.
 - **Escopo:** uma fonte só. Nada aqui depende de outro repositório do projeto.
 
 **Duas particularidades desta fonte:**
@@ -42,7 +43,7 @@ a preços correntes e constantes (deflacionados pelo IPCA).
 | Coleta / tratamento / análise | Python 3.13 (`requests`, `pandas`, `openpyxl`) |
 | Publicação de dados | JSON estático gerado pelo Python |
 | Front-end / dashboard | HTML + CSS + JavaScript com Chart.js (via CDN) |
-| Hospedagem | GitHub Pages (pasta `/docs`) |
+| Hospedagem | Cloudflare Worker de estáticos (`wrangler.jsonc`, pasta `/docs`), deploy pelo `deploy.yml` |
 
 > `openpyxl` é obrigatório aqui (leitura do XLSX) — é o que diferencia o
 > `requirements.txt` deste repositório dos das fontes que consomem API JSON.
@@ -66,15 +67,20 @@ fonte-arrecadacao-federal/
 │   ├── brutos/                 # XLSX baixados + IPCA (regeneráveis; fora do git)
 │   └── processados/            # CSV tidy
 ├── docs/                       # Etapas 6 e E — site publicado
-│   ├── explorar.html                   # Etapa E — perfil + pauta analitica
-│   ├── js/explorar.js
+│   ├── index.html                      # Etapa 6 — V2 (oficial)
+│   ├── skill.html                      # download da skill do Claude
+│   ├── css/estilo-v2.css
+│   ├── js/app-v2.js
+│   ├── skill/arrecadacao-federal-rfb.zip   # gerado
+│   ├── v1/                             # V1 arquivada (index, explorar, js, css)
 │   ├── dados/perfil_arrecadacao_federal.json  # Etapa E (gerado)
 │   ├── dados/notas_arrecadacao_federal.json   # Etapa E (a mao, nunca sobrescrito)
-│   ├── index.html
-│   ├── css/estilo.css
-│   ├── js/app.js
+│   ├── dados/eventos_arrecadacao_federal.json  # marcos (a mao)
+│   ├── dados/arrecadacao_federal_mensal.csv    # CSV publico (gerado)
 │   └── dados/arrecadacao_federal.json
 ├── catalogo/fonte.md           # Etapa 1 — dicionário de dados
+├── skill/arrecadacao-federal-rfb/  # skill do Claude (SKILL.md, scripts/, references/)
+├── wrangler.jsonc              # Worker de estáticos
 └── prompts/                    # prompt de abertura de sessão desta fonte
 ```
 
@@ -92,7 +98,7 @@ fonte-arrecadacao-federal/
 
                ──Etapa E──▶  docs/dados/perfil_arrecadacao_federal.json  (gerado)
                              docs/dados/notas_arrecadacao_federal.json   (a mao)
-                                     └──▶ docs/explorar.html
+                                     └──▶ docs/v1/explorar.html
 
 **Etapa E.** Roda depois da Etapa 3 e antes da 4. Perfila cinco tabelas (aba anual
 representativa do XLSX, tidy, inventario das 41 abas, IPCA e hierarquia de tributos) e
@@ -107,10 +113,10 @@ arquivo existente foi o link "Explorar dados" na navegacao do `index.html`.
 | 2 | Ingestão / coleta | `src/coleta/` | XLSX + IPCA → arquivos brutos | ✅ |
 | 3 | Tratamento & modelagem | `src/tratamento/` | brutos → CSV tidy (+ deflação) | ✅ |
 | 4 | Análise estatística | `src/analise/` | CSV tidy → métricas | ✅ |
-| E | Exploração & pauta | `src/perfil/`, `docs/explorar.html` | bruto + tidy + auxiliares → perfil + pauta | ✅ |
+| E | Exploração & pauta | `src/perfil/`, `docs/v1/explorar.html` | bruto + tidy + auxiliares → perfil + pauta | ✅ |
 | 5 | Publicação de dados | `src/publicacao/` | tidy + métricas → JSON do front | ✅ |
 | 6 | Dashboard | `docs/` | JSON → site interativo | ✅ |
-| 7 | Documentação & deploy | `README.md`, GitHub Pages | — → site no ar | 🟡 |
+| 7 | Documentação & deploy | `README.md`, `wrangler.jsonc`, `deploy.yml` | — → site no ar | ✅ |
 
 **Formato tidy (saída da Etapa 3):** `ano_mes`, `tributo`, `rotulo`, `tributo_pai`, `nivel`,
 `tipo`, `valor`, `valor_constante`. Segue a anatomia comum do projeto — **dimensões em linha,
