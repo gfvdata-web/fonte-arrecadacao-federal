@@ -13,7 +13,7 @@
 #     perfil_*.json, arrecadacao_federal_mensal.csv (colunas, cobertura = JSON)
 #   Páginas V2: index.html, skill.html                                  tests/test_paginas.py
 #     links locais, ids do app-v2.js x HTML, nav só Painel + Skill Claude, sem link para v1/ ou
-#     explorar, GoatCounter, CDN com versão fixa, alternador de tema, zip/CSV da skill
+#     explorar, GoatCounter (com prefixo /fonte-arrecadacao-federal), CDN com versão fixa, alternador de tema, zip/CSV da skill
 #   Páginas V1 arquivadas (docs/v1/)                                    tests/test_paginas.py
 #     existem, noindex, links locais, dados lidos de ../dados/
 #   JS do painel (app-v2.js) com DOM e Chart.js falsos                  tests/js/paginas.test.js

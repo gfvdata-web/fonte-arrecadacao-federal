@@ -73,6 +73,19 @@ class TestPaginasV2(unittest.TestCase):
             self.assertEqual(len(gc), 1, nome)
             self.assertEqual(gc[0]["data-goatcounter"], "https://gfvdata.goatcounter.com/count")
 
+    def test_goatcounter_com_prefixo_do_repo_antes_do_snippet(self):
+        # Domínio próprio: sem o prefixo, o GoatCounter registra o caminho sem /fonte-arrecadacao-federal/
+        # e o painel-status não conta as visitas.
+        prefixo = 'window.goatcounter = { path: (p) => "/fonte-arrecadacao-federal" + p };'
+        for html in sorted(DOCS.rglob("*.html")):
+            texto = html.read_text(encoding="utf-8")
+            nome = str(html.relative_to(DOCS))
+            self.assertEqual(texto.count("data-goatcounter="), 1, nome)
+            self.assertEqual(texto.count("window.goatcounter"), 1, nome)
+            self.assertIn(prefixo, texto, f"{nome}: falta o prefixo /fonte-arrecadacao-federal do GoatCounter")
+            self.assertLess(texto.index("window.goatcounter"), texto.index("data-goatcounter="), nome)
+            self.assertLess(texto.index("data-goatcounter="), texto.index("</head>"), nome)
+
     def test_cdn_com_versao_fixa(self):
         cdns = [s["src"] for pag in V2.values() for s in pag.scripts if s.get("src", "").startswith("https://cdn")]
         self.assertGreaterEqual(len(cdns), 3)
