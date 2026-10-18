@@ -22,6 +22,8 @@
 #   Sintaxe: .py, JSON, CSV, node --check (docs/**/*.js, tests/js, <script> inline) tests/test_sintaxe.py
 #   Pipeline: análise (tidy mínimo), publicação (JSON + cópia do CSV), orquestrador tests/test_pipeline.py
 #   Skill do Claude (SKILL.md, carregar_dados.py --arquivo offline, zip em dia, eventos.md = JSON) tests/test_skill.py
+#   Contador de downloads (cloudflare/contagem.mjs + worker.mjs) com D1 falso  tests/js/contagem.test.js
+#     zip/CSV contam (GET 200 sem Range), navegador/script/robô, /contagem.json, D1 fora do ar
 #   Publicação: wrangler.jsonc, .github/workflows/deploy.yml, requirements, .gitignore tests/test_automacao.py
 #   (sem teste: coleta real do gov.br e da API do IPCA, tratamento do XLSX bruto e perfil — exigem
 #    rede/arquivos gitignorados; CDN do Chart.js, deploy na Cloudflare, desenho dos gráficos e CSS)
@@ -47,6 +49,7 @@ case "$alvo" in
     testes_js
     ;;
   src/*.py|run_pipeline.py) testes_py tests.test_pipeline tests.test_skill tests.test_sintaxe ;;
+  cloudflare/*)             testes_js ;;
   tests/js/*.js)            testes_js; rodar node --check "$alvo" ;;
   tests/fixtures/*)         testes_py tests.test_pipeline tests.test_sintaxe ;;
   tests/test_*.py)          m="${alvo%.py}"; testes_py "${m//\//.}" ;;

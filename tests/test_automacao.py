@@ -23,7 +23,19 @@ class TestWrangler(unittest.TestCase):
         self.assertEqual(WRANGLER["name"], "arrecadacao-federal")
         self.assertEqual(WRANGLER["assets"]["directory"], "./docs")
         self.assertTrue((RAIZ / "docs" / "index.html").is_file())
-        self.assertNotIn("main", WRANGLER, "Worker só de assets não tem código")
+
+    def test_codigo_so_roda_no_contador_de_downloads(self):
+        # O resto do site sai direto dos assets, sem invocar o Worker (cota grátis).
+        self.assertEqual(WRANGLER["main"], "./cloudflare/worker.mjs")
+        self.assertTrue((RAIZ / "cloudflare" / "worker.mjs").is_file())
+        self.assertEqual(WRANGLER["assets"]["binding"], "ASSETS")
+        self.assertEqual(
+            WRANGLER["assets"]["run_worker_first"], ["/contagem.json", "/skill/*", "/dados/*.csv"]
+        )
+        self.assertEqual(WRANGLER["vars"]["SITE"], "fonte-arrecadacao-federal")
+        (d1,) = WRANGLER["d1_databases"]
+        self.assertEqual((d1["binding"], d1["database_name"]), ("DOWNLOADS", "downloads"))
+        self.assertRegex(d1["database_id"], r"^[0-9a-f-]{36}$")
 
     def test_dominio_proprio_sem_workers_dev(self):
         rotas = WRANGLER["routes"]

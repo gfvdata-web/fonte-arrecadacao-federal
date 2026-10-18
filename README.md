@@ -57,12 +57,19 @@ python -m http.server 8000 --directory docs
 | `docs/v1/` | 6/E | V1 arquivada (`index.html`, `explorar.html`) |
 | `skill/arrecadacao-federal-rfb/` | 5 | Fonte da skill (empacotada por `src/publicacao/skill.py`) |
 | `wrangler.jsonc` | 7 | Worker de estáticos `arrecadacao-federal` (serve `docs/`) |
+| `cloudflare/` | 7 | Contador de downloads (`contagem.mjs` + `worker.mjs`, D1 `downloads`) |
 | `prompts/` | — | Prompt de abertura de sessão desta fonte |
 
 ## Deploy
 
 Push para `main` → `.github/workflows/deploy.yml` roda `wrangler deploy` (secret
 `CLOUDFLARE_API_TOKEN`) e publica `docs/` em https://arrecadacaofederal.gfvdata.com/.
+
+**Contagem de downloads.** O código do Worker só roda em `/skill/*`, `/dados/*.csv` e `/contagem.json`
+(`run_worker_first`). Cada GET 200 inteiro do zip da skill ou do CSV soma 1 no D1 `downloads`
+(compartilhado com meios-pagamento e credito-modalidade), por arquivo, dia (Brasília) e tipo
+(navegador, script — a skill baixa o CSV em Python — ou robô). Nada de IP nem cookie.
+`/contagem.json` publica o resumo, lido pelo painel-status. `cloudflare/contagem.mjs` é igual nos 3 repos.
 
 ## Licença dos dados
 

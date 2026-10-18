@@ -43,7 +43,7 @@ a preços correntes e constantes (deflacionados pelo IPCA).
 | Coleta / tratamento / análise | Python 3.13 (`requests`, `pandas`, `openpyxl`) |
 | Publicação de dados | JSON estático gerado pelo Python |
 | Front-end / dashboard | HTML + CSS + JavaScript com Chart.js (via CDN) |
-| Hospedagem | Cloudflare Worker de estáticos (`wrangler.jsonc`, pasta `/docs`), deploy pelo `deploy.yml` |
+| Hospedagem | Cloudflare Worker de estáticos (`wrangler.jsonc`, pasta `/docs`), deploy pelo `deploy.yml`; contador de downloads em `cloudflare/` (D1 `downloads`, `/contagem.json`) |
 
 > `openpyxl` é obrigatório aqui (leitura do XLSX) — é o que diferencia o
 > `requirements.txt` deste repositório dos das fontes que consomem API JSON.
@@ -80,7 +80,8 @@ fonte-arrecadacao-federal/
 │   └── dados/arrecadacao_federal.json
 ├── catalogo/fonte.md           # Etapa 1 — dicionário de dados
 ├── skill/arrecadacao-federal-rfb/  # skill do Claude (SKILL.md, scripts/, references/)
-├── wrangler.jsonc              # Worker de estáticos
+├── wrangler.jsonc              # Worker de estáticos (+ contador de downloads)
+├── cloudflare/                 # contagem.mjs (igual nos 3 repos de fontes) + worker.mjs
 └── prompts/                    # prompt de abertura de sessão desta fonte
 ```
 

@@ -1,11 +1,20 @@
-// Site estático (docs/) servido por um Worker só de assets, sem código.
+// Site estático (docs/) servido por um Worker de assets. O código (cloudflare/worker.mjs) só roda em
+// /contagem.json, /skill/* e /dados/*.csv, para contar downloads no D1 `downloads` (compartilhado
+// com os outros sites de dados abertos; o painel-status lê /contagem.json).
 {
   "name": "arrecadacao-federal",
   "account_id": "24bbd7ba409d9e38e4636846172bd76d",
   "compatibility_date": "2026-10-01",
+  "main": "./cloudflare/worker.mjs",
   "assets": {
-    "directory": "./docs"
+    "directory": "./docs",
+    "binding": "ASSETS",
+    "run_worker_first": ["/contagem.json", "/skill/*", "/dados/*.csv"]
   },
+  "d1_databases": [
+    { "binding": "DOWNLOADS", "database_name": "downloads", "database_id": "843b0381-682b-42da-accc-2530895fbb1d" }
+  ],
+  "vars": { "SITE": "fonte-arrecadacao-federal" },
   "routes": [{ "pattern": "arrecadacaofederal.gfvdata.com", "custom_domain": true }],
   "workers_dev": false,
   "preview_urls": false
